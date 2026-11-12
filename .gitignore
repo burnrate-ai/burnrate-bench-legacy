@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+*.keypair.json
+*-keypair*.json
+id.json
+secrets/

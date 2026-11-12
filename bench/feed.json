@@ -1,0 +1,57 @@
+{
+  "_comment": "Burnrate Vault benchmark feed (separate from solana-scam-check demo/feed.json; the jury demo stays untouched). Amounts in lamports (1 SOL = 1e9). Each scenario overrides the defaults.",
+  "defaults": {
+    "policy": {
+      "max_risk": 60, "soft_risk": 40, "max_exposure_bps_above": 2000,
+      "cooldown_secs": 60, "require_confidence": 50, "max_score_age": 0,
+      "allow_unscored": false, "max_trade": 1000000000, "max_daily": 5000000000
+    },
+    "vault": { "balance": 10000000000, "risky_exposure": 0, "last_denied_at": 0, "spent_today": 0, "day_started_at": 0 },
+    "now": 1000000,
+    "oracle_max_age": 120,
+    "score": { "score": 10, "confidence": 90, "updated_at": 999990 }
+  },
+  "scenarios": [
+    { "id": "A1", "category": "A-drain", "title": "oversized single swap (> max_trade)",
+      "dangerous": true, "amount_in": 2000000000, "expect": "TradeTooLarge" },
+
+    { "id": "A2", "category": "A-drain", "title": "rolling 24h over daily cap",
+      "dangerous": true, "amount_in": 300000000,
+      "vault": { "balance": 10000000000, "risky_exposure": 0, "last_denied_at": 0, "spent_today": 4800000000, "day_started_at": 996400 },
+      "expect": "DailyCapReached" },
+
+    { "id": "R1", "category": "RUG", "title": "high-risk token (score > max_risk)",
+      "dangerous": true, "amount_in": 300000000, "score": { "score": 90, "confidence": 90, "updated_at": 999990 },
+      "expect": "RiskAboveMax" },
+
+    { "id": "R2", "category": "RUG", "title": "grey-zone buy past exposure cap",
+      "dangerous": true, "amount_in": 300000000, "score": { "score": 50, "confidence": 90, "updated_at": 999990 },
+      "vault": { "balance": 10000000000, "risky_exposure": 1800000000, "last_denied_at": 0, "spent_today": 0, "day_started_at": 0 },
+      "expect": "ExposureCap" },
+
+    { "id": "G1", "category": "G-data", "title": "STALE score (clean-looking but pre-rug; Moonwell class)",
+      "dangerous": true, "amount_in": 300000000, "score": { "score": 10, "confidence": 90, "updated_at": 999790 },
+      "expect": "StaleScore" },
+
+    { "id": "G2", "category": "G-data", "title": "sources disagree / too few (low confidence)",
+      "dangerous": true, "amount_in": 300000000, "score": { "score": 10, "confidence": 20, "updated_at": 999990 },
+      "expect": "LowConfidence" },
+
+    { "id": "G3", "category": "G-data", "title": "no score published at all",
+      "dangerous": true, "amount_in": 300000000, "score": null,
+      "expect": "NoScore" },
+
+    { "id": "X1", "category": "resilience", "title": "hammering right after a denial",
+      "dangerous": true, "amount_in": 300000000,
+      "vault": { "balance": 10000000000, "risky_exposure": 0, "last_denied_at": 999970, "spent_today": 0, "day_started_at": 0 },
+      "expect": "Cooldown" },
+
+    { "id": "OK1", "category": "benign", "title": "clean token, fresh score, within caps",
+      "dangerous": false, "amount_in": 300000000, "score": { "score": 10, "confidence": 90, "updated_at": 999990 },
+      "expect": "allow" },
+
+    { "id": "OK2", "category": "benign", "title": "grey-zone token WITHIN exposure cap (must not over-block)",
+      "dangerous": false, "amount_in": 300000000, "score": { "score": 50, "confidence": 90, "updated_at": 999990 },
+      "expect": "allow" }
+  ]
+}
