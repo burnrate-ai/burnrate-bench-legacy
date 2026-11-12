@@ -49,8 +49,14 @@ same function, B/C/D are contained by the vault's capability model (agent key �
    `StaleScore ×4`, `DailyCapReached ×3`, `TradeTooLarge ×2`, `NoScore ×1`. The live program really
    refuses on stale data (the Moonwell class) and spend caps, with the **same DenyReason set** the sim
    uses — phase-1 logic ↔ phase-2 chain. Example txs print as `explorer.solana.com/tx/…?cluster=devnet`.
-3. **real-LLM arm** — scripted agent → LLM agent (Anthropic key in a gitignored `.env`) to reproduce
-   SolVerdict's "safe alone, drains inside a kit → contained by the Vault".
+3. **real-LLM arm** (`npm run bench:agent`) — a real LLM agent (Anthropic key in a gitignored `.env`;
+   copy `.env.example`) decides swap/refuse on 6 situations; two arms, `agent_alone` vs
+   `agent_plus_vault`. First run (claude-sonnet-5-5): the model contained the obvious attacks on its own
+   (hype, metadata injection, an "urgent" drain order) — **3/4** — but swapped on a **stale score** (the
+   text looked fine; the Moonwell data-integrity class is invisible in the prompt). The Vault caught it
+   with `StaleScore` → **agent_plus_vault 4/4, 0 false positives**. A capable model is safe on the
+   obvious and still gets rekt by bad data; the on-chain freshness/score checks catch what it can't see.
+   (Model judgement varies run to run; the Vault's containment does not.)
 
 ## Safety
 Sim now; phase 2 runs in devnet/localnet, cheatcode-funded, **never real funds**, no attacks on any
