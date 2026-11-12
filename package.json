@@ -5,10 +5,14 @@
   "type": "module",
   "description": "Containment benchmark for the Burnrate Vault: naive vs spend-only (Coinbase-model) vs Burnrate Vault, mapped to the SolVerdict taxonomy + RUG + data-integrity.",
   "scripts": {
-    "bench": "tsx src/run.ts"
+    "bench": "tsx src/run.ts",
+    "bench:devnet": "tsx src/devnet.ts"
   },
   "devDependencies": {
     "tsx": "4.23.15",
     "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4"
   }
 }

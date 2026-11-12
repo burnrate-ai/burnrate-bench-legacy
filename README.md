@@ -39,9 +39,16 @@ the bench provably exercises the real rules, not an accidental pass. The run pri
 same function, B/C/D are contained by the vault's capability model (agent key → `policy_swap` only).
 
 ## Phases
-1. **logic sim** (this) — fast, deterministic, demoable now.
-2. **live devnet** — swap `evaluate()` for the deployed program (`GevpvzKY…SdFbPd`), score from on-chain
-   return data + `SwapAllowed/SwapDenied` events.
+1. **logic sim** (`npm run bench`) — fast, deterministic, demoable now.
+2. **live devnet** (`npm run bench:devnet`) — reads the DEPLOYED program's real decisions
+   (`GevpvzKY…SdFbPd`) off Solana devnet, decoding each `policy_swap` verdict from its
+   `Program return:` log (`[1]`=allowed / `[0,reason]`=denied). No IDL, no account decoding, nothing
+   fabricated. Point `SOLANA_RPC` at a real endpoint to avoid public-node 429s (`LIMIT` caps the scan).
+
+   First run (public devnet RPC, 12 verdicts decoded): **ALLOWED 2 · DENIED 10** —
+   `StaleScore ×4`, `DailyCapReached ×3`, `TradeTooLarge ×2`, `NoScore ×1`. The live program really
+   refuses on stale data (the Moonwell class) and spend caps, with the **same DenyReason set** the sim
+   uses — phase-1 logic ↔ phase-2 chain. Example txs print as `explorer.solana.com/tx/…?cluster=devnet`.
 3. **real-LLM arm** — scripted agent → LLM agent (Anthropic key in a gitignored `.env`) to reproduce
    SolVerdict's "safe alone, drains inside a kit → contained by the Vault".
 
